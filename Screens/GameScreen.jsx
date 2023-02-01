@@ -1,7 +1,14 @@
-import { usePreventRemoveContext } from '@react-navigation/native';
-import React, { useEffect } from 'react';
-import { View, Text, Alert, StyleSheet } from 'react-native';
-import { Surface } from 'react-native-paper';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Button } from 'react-native';
+import GestureRecognizer, {swipeDirections} from 'react-native-swipe-gestures';
+import Animated, {
+    useAnimatedStyle,
+    withRepeat,
+    withSequence,
+    withTiming,
+} from 'react-native-reanimated';
+import { Button as PaperButton } from 'react-native-paper';
+
 
 const data = [
     {
@@ -22,48 +29,117 @@ const data = [
     }
 ]
 
-const GameScreen = ({navigation}) => {
+const GameScreen = ({navigation, route}) => {
 
+    const [current, setCurrent] = useState(0);
+    const [gameRunning, setGameRunning] = useState(true);
+    // const timerCount = route.params.timer;
+    let timerCount = 10;
+    let timer = null;
+
+    const changeWord = () => {
+        if(current + 1 == data.length) return;
+        setCurrent(current + 1);
+    }
+
+    useEffect(() => {
+        // set the timer
+        timer = setInterval(
+            () => {
+                timerCount = timerCount - 1;
+                if(timerCount < 10){
+                    // console.log(timerCount);
+                }
+                if(timerCount == 0) {
+                    clearInterval(timer);
+                    setGameRunning(false);
+                }
+            }, 
+            1000
+        );
+
+        return () => {
+            clearInterval(timer);
+        }
+    }, [])
+
+    const showPostActions = () => {
+        return(
+            <View style={styles.container}>
+                <PaperButton icon="replay" mode="contained" onPress={() => console.log('Pressed')}>
+                    Play Again
+                </PaperButton>
+            </View>
+        )
+    }
+    
+    const onSwipe = (gestureName, gestureState) => {
+        // const {SWIPE_UP, SWIPE_DOWN, SWIPE_LEFT, SWIPE_RIGHT} = swipeDirections;
+    
+        // switch (gestureName) {
+        //   case SWIPE_UP:
+        //     console.log('red');
+        //     break;
+        //   case SWIPE_DOWN:
+        //     console.log('green');
+        //     break;
+        //   case SWIPE_LEFT:
+        //     console.log('blue');
+        //     break;
+        //   case SWIPE_RIGHT:
+        //     console.log('yellow');
+        //     break;
+        // }
+        changeWord();
+    }
+     
+    const config = {
+        velocityThreshold: 0.3,
+        directionalOffsetThreshold: 80
+    };
+
+    const glowAnimation = useAnimatedStyle(() => ({
+        transform: [
+            {
+                scale: withRepeat(
+                    withSequence(
+                        withTiming(1, { duration: 1500 }),
+                        withTiming(1.2, { duration: 1500 })
+                    ),
+                    -1,
+                    true
+                ),
+            },
+        ],
+    }));
+    
 
     return(
-        <View style = {styles.container}>
-            {/* <View style = {styles.surface}>
+        gameRunning ? 
+        <GestureRecognizer config={config} 
+            onSwipe={(direction, state) => onSwipe(direction, state)}
+            style = {styles.container}
+        >
+            <Animated.View style = {[styles.surface]}>
                 <View style = {styles.mainWord}>
                     <Text>
-                        This is the main word
+                        {data[current].mainWord}
                     </Text>
                 </View>
-
                 <View style = {styles.tabooWords}>
-                    <Text>
-                        these are hints
-                    </Text>
+                    {
+                        data[current].secondaryWords.map((item, index) => {
+                            return(
+                                <Text key={index}>{item}</Text>
+                            )
+                        })
+                    }
                 </View>
-            </View> */}
-            {
-                data.map((words, index) => {
-                    return(
-                        <View key={index} style = {[styles.surface, index != 0 && styles.hidden]}>
-                            <View style = {styles.mainWord}>
-                                <Text>
-                                    {words.mainWord}
-                                </Text>
-                            </View>
-
-                            <View style = {styles.tabooWords}>
-                                {
-                                    words.secondaryWords.map((item, index) => {
-                                        return(
-                                            <Text key={index}>{item}</Text>
-                                        )
-                                    })
-                                }
-                            </View>
-                        </View>
-                    )
-                })
-            }
-        </View>
+                <Button onPress={changeWord} title = 'Change Question'></Button>
+            </Animated.View>
+        </GestureRecognizer>
+        : 
+        showPostActions()
     )
 }
 
@@ -94,9 +170,15 @@ const styles = StyleSheet.create({
     tabooWords : {
 
     },
-    hidden : {
-        display : 'none'
-    }
+    glowContainer: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        position: 'absolute',
+        top: 8,
+        bottom: 0,
+        left: 0,
+        right: 4,
+    },
 })
 
 export default GameScreen;

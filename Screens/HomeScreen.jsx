@@ -1,5 +1,6 @@
 import { StatusBar } from "expo-status-bar";
-import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
+import { Button } from "react-native-paper";
 
 const Home = ({navigation}) => {
     const startGame = () => {
@@ -13,11 +14,9 @@ const Home = ({navigation}) => {
 				Welcome to Midnight Taboo
 			</Text>
 			<View style={styles.buttons}>
-				<TouchableOpacity style={styles.button} onPress = {() => startGame()}>
-					<Text style={{textAlign : 'center'}}>
-						Start a new game
-					</Text>
-				</TouchableOpacity>
+				<Button mode="contained" onPress={startGame}>
+					New Game
+				</Button>		
 			</View>
 		</View>
 	);
