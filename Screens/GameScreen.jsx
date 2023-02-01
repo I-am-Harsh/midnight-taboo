@@ -29,10 +29,12 @@ const data = [
     }
 ]
 
-const GameScreen = ({navigation, route}) => {
+const GameScreen = ({ navigation, route }) => {
 
     const [current, setCurrent] = useState(0);
     const [gameRunning, setGameRunning] = useState(true);
+    const [totalScore, setTotalScore] = useState(0);
+    const [userScore, setUserScore] = useState(0);
     // const timerCount = route.params.timer;
     let timerCount = 10;
     let timer = null;
@@ -43,12 +45,19 @@ const GameScreen = ({navigation, route}) => {
     }
 
     useEffect(() => {
-        // set the timer
+        startTimer();
+ 
+        return () => {
+            clearInterval(timer);
+        }
+    }, [])
+
+    const startTimer = () => {
         timer = setInterval(
             () => {
                 timerCount = timerCount - 1;
                 if(timerCount < 10){
-                    // console.log(timerCount);
+                    console.log(timerCount);
                 }
                 if(timerCount == 0) {
                     clearInterval(timer);
@@ -57,39 +66,45 @@ const GameScreen = ({navigation, route}) => {
             }, 
             1000
         );
-
-        return () => {
-            clearInterval(timer);
-        }
-    }, [])
+    }
 
     const showPostActions = () => {
         return(
             <View style={styles.container}>
-                <PaperButton icon="replay" mode="contained" onPress={() => console.log('Pressed')}>
+                <Text>
+                    Score : {userScore} / {totalScore}
+                </Text>
+                <PaperButton icon="replay" mode="contained" onPress={replayGame}>
                     Play Again
                 </PaperButton>
             </View>
         )
     }
+
+    const replayGame = () => {
+        setGameRunning(true);
+        setCurrent(0);
+        startTimer();
+    }
     
     const onSwipe = (gestureName, gestureState) => {
-        // const {SWIPE_UP, SWIPE_DOWN, SWIPE_LEFT, SWIPE_RIGHT} = swipeDirections;
+        const {SWIPE_UP, SWIPE_DOWN, SWIPE_LEFT, SWIPE_RIGHT} = swipeDirections;
     
-        // switch (gestureName) {
-        //   case SWIPE_UP:
-        //     console.log('red');
-        //     break;
-        //   case SWIPE_DOWN:
-        //     console.log('green');
-        //     break;
+        switch (gestureName) {
+          case SWIPE_UP:
+            setTotalScore(totalScore + 1);
+            break;
+          case SWIPE_DOWN:
+            setUserScore(userScore + 1);
+            setTotalScore(totalScore + 1);
+            break;
         //   case SWIPE_LEFT:
         //     console.log('blue');
         //     break;
         //   case SWIPE_RIGHT:
         //     console.log('yellow');
         //     break;
-        // }
+        }
         changeWord();
     }
      
