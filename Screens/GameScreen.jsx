@@ -30,10 +30,11 @@ const data = [
 ]
 
 const GameScreen = ({ navigation, route }) => {
+const GameScreen = ({ navigation, route }) => {
 
     const [current, setCurrent] = useState(0);
     const [gameRunning, setGameRunning] = useState(true);
-    const [totalScore, setTotalScore] = useState(0);
+    const [totalScore, setTotalScore] = useState(1);
     const [userScore, setUserScore] = useState(0);
     // const timerCount = route.params.timer;
     let timerCount = 10;
